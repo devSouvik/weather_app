@@ -3,6 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_launcher_icons/android.dart';
+import 'package:flutter_launcher_icons/constants.dart';
+import 'package:flutter_launcher_icons/custom_exceptions.dart';
+import 'package:flutter_launcher_icons/ios.dart';
+import 'package:flutter_launcher_icons/main.dart';
+import 'package:flutter_launcher_icons/utils.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 
 void main() => runApp(WeatherApp());
 
@@ -149,7 +156,7 @@ class _WeatherAppState extends State<WeatherApp> {
                           onTap: () {
                             _getCurrentLocation();
                           },
-                          child: Icon(Icons.location_city, size: 36.0),
+                          child: Icon(Icons.my_location, size: 36.0),
                         ),
                       )
                     ],
@@ -273,11 +280,11 @@ Widget forecastElement(
             ),
             Text(
               'High: ' + maxTemperature.toString() + ' °C',
-              style: TextStyle(color: Colors.white, fontSize: 20.0),
+              style: TextStyle(color: Colors.white, fontSize: 15.0),
             ),
             Text(
               'Low: ' + minTemperature.toString() + ' °C',
-              style: TextStyle(color: Colors.white, fontSize: 20.0),
+              style: TextStyle(color: Colors.white, fontSize: 15.0),
             ),
           ],
         ),
