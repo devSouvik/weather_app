@@ -18,6 +18,7 @@ dependencies:
   http: ^0.12.2
   weather: ^1.2.4
   geolocator: ^5.3.1
+  intl: ^0.16.1
   
 
 
