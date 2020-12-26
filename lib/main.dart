@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+import 'package:geolocator/geolocator.dart';
 
 void main() => runApp(WeatherApp());
 
@@ -17,6 +17,11 @@ class _WeatherAppState extends State<WeatherApp> {
   String weather = 'clear';
   String abbreviation = '';
   String errorMessage = '';
+
+  final Geolocator geolocator = Geolocator();
+
+  Position _currentPosition;
+  String _currentAddress;
 
   String searchApiUrl =
       'https://www.metaweather.com/api/location/search/?query=';
@@ -64,6 +69,38 @@ class _WeatherAppState extends State<WeatherApp> {
     fetchLocation();
   }
 
+  _getCurrentLocation() {
+    geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+
+      _getAddressFromLatLng();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await geolocator.placemarkFromCoordinates(
+          _currentPosition.latitude, _currentPosition.longitude);
+
+      Placemark place = p[0];
+
+      setState(() {
+        _currentAddress =
+            "${place.locality}, ${place.postalCode}, ${place.country}";
+      });
+
+      onTextFieldSubmitted(place.locality);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,6 +115,25 @@ class _WeatherAppState extends State<WeatherApp> {
           child: temperature == null
               ? Center(child: CircularProgressIndicator())
               : Scaffold(
+                  appBar: AppBar(
+                    actions: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            _getCurrentLocation();
+                          },
+                          child: Icon(
+                            Icons.location_on,
+                            size: 36.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                    backgroundColor: Colors.transparent,
+                    elevation: 0.0,
+                  ),
+                  // resizeToAvoidBottomInset: false,
                   backgroundColor: Colors.transparent,
                   body: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -95,7 +151,7 @@ class _WeatherAppState extends State<WeatherApp> {
                           ),
                           Center(
                             child: Text(
-                              temperature.toString() + ' °C',
+                              temperature.toString() + '°C',
                               style: TextStyle(
                                   color: Colors.white, fontSize: 60.0),
                             ),
