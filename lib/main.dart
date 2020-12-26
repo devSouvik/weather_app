@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_launcher_icons/android.dart';
-import 'package:flutter_launcher_icons/constants.dart';
-import 'package:flutter_launcher_icons/custom_exceptions.dart';
-import 'package:flutter_launcher_icons/ios.dart';
-import 'package:flutter_launcher_icons/main.dart';
-import 'package:flutter_launcher_icons/utils.dart';
-import 'package:flutter_launcher_icons/xml_templates.dart';
 
 void main() => runApp(WeatherApp());
 
@@ -20,16 +14,16 @@ class WeatherApp extends StatefulWidget {
 
 class _WeatherAppState extends State<WeatherApp> {
   int temperature;
+  var minTemperatureForecast = new List(7);
+  var maxTemperatureForecast = new List(7);
   String location = 'Kolkata';
   int woeid = 2295386;
   String weather = 'clear';
   String abbreviation = '';
-  String errorMessage = '';
-  var minTempForecast = new List(7);
-  var maxTempForecast = new List(7);
   var abbreviationForecast = new List(7);
+  String errorMessage = '';
 
-  final Geolocator geolocator = Geolocator();
+  final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
 
   Position _currentPosition;
   String _currentAddress;
@@ -37,6 +31,7 @@ class _WeatherAppState extends State<WeatherApp> {
   String searchApiUrl =
       'https://www.metaweather.com/api/location/search/?query=';
   String locationApiUrl = 'https://www.metaweather.com/api/location/';
+
   initState() {
     super.initState();
     fetchLocation();
@@ -55,8 +50,7 @@ class _WeatherAppState extends State<WeatherApp> {
       });
     } catch (error) {
       setState(() {
-        errorMessage =
-            "Sorry, we don't have data about this city. Try another one.";
+        errorMessage = "Sorry, we don't have data about this city.";
       });
     }
   }
@@ -64,8 +58,8 @@ class _WeatherAppState extends State<WeatherApp> {
   void fetchLocation() async {
     var locationResult = await http.get(locationApiUrl + woeid.toString());
     var result = json.decode(locationResult.body);
-    var consolidated_weather = result["consolidated_weather"];
-    var data = consolidated_weather[0];
+    var consolidatedWeather = result["consolidated_weather"];
+    var data = consolidatedWeather[0];
 
     setState(() {
       temperature = data["the_temp"].round();
@@ -87,8 +81,8 @@ class _WeatherAppState extends State<WeatherApp> {
       var data = result[0];
 
       setState(() {
-        minTempForecast[i] = data["min_temp"].round();
-        maxTempForecast[i] = data["max_temp"].round();
+        minTemperatureForecast[i] = data["min_temp"].round();
+        maxTemperatureForecast[i] = data["max_temp"].round();
         abbreviationForecast[i] = data["weather_state_abbr"];
       });
     }
@@ -139,7 +133,7 @@ class _WeatherAppState extends State<WeatherApp> {
       home: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('images/$weather.png'),
+              image: AssetImage('images/$weather.jpg'),
               fit: BoxFit.cover,
               colorFilter: new ColorFilter.mode(
                   Colors.black.withOpacity(0.6), BlendMode.dstATop),
@@ -156,7 +150,7 @@ class _WeatherAppState extends State<WeatherApp> {
                           onTap: () {
                             _getCurrentLocation();
                           },
-                          child: Icon(Icons.my_location, size: 36.0),
+                          child: Icon(Icons.my_location_rounded, size: 36.0),
                         ),
                       )
                     ],
@@ -200,8 +194,11 @@ class _WeatherAppState extends State<WeatherApp> {
                         child: Row(
                           children: <Widget>[
                             for (var i = 0; i < 7; i++)
-                              forecastElement(i + 1, abbreviationForecast[i],
-                                  minTempForecast[i], maxTempForecast[i]),
+                              forecastElement(
+                                  i + 1,
+                                  abbreviationForecast[i],
+                                  minTemperatureForecast[i],
+                                  maxTemperatureForecast[i]),
                           ],
                         ),
                       ),
@@ -209,18 +206,21 @@ class _WeatherAppState extends State<WeatherApp> {
                         children: <Widget>[
                           Container(
                             width: 300,
-                            child: TextField(
-                              onSubmitted: (String input) {
-                                onTextFieldSubmitted(input);
-                              },
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 25),
-                              decoration: InputDecoration(
-                                hintText: 'Search another location...',
-                                hintStyle: TextStyle(
-                                    color: Colors.white, fontSize: 18.0),
-                                prefixIcon:
-                                    Icon(Icons.search, color: Colors.white),
+                            child: Opacity(
+                              opacity: 0.6,
+                              child: TextField(
+                                onSubmitted: (String input) {
+                                  onTextFieldSubmitted(input);
+                                },
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 25),
+                                decoration: InputDecoration(
+                                  hintText: 'Search another location...',
+                                  hintStyle: TextStyle(
+                                      color: Colors.white, fontSize: 18.0),
+                                  prefixIcon:
+                                      Icon(Icons.search, color: Colors.white),
+                                ),
                               ),
                             ),
                           ),
@@ -233,7 +233,7 @@ class _WeatherAppState extends State<WeatherApp> {
                               style: TextStyle(
                                 color: Colors.redAccent,
                                 // fontSize:
-                                //     Platform.isAndroid ? 15.0 : 20.0)
+                                // Platform.isAndroid ? 15.0 : 20.0)),
                               ),
                             ),
                           ),
@@ -280,11 +280,11 @@ Widget forecastElement(
             ),
             Text(
               'High: ' + maxTemperature.toString() + ' °C',
-              style: TextStyle(color: Colors.white, fontSize: 15.0),
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
             ),
             Text(
               'Low: ' + minTemperature.toString() + ' °C',
-              style: TextStyle(color: Colors.white, fontSize: 15.0),
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
             ),
           ],
         ),
