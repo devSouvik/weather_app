@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_launcher_icons/android.dart';
+import 'package:flutter_launcher_icons/constants.dart';
+import 'package:flutter_launcher_icons/custom_exceptions.dart';
+import 'package:flutter_launcher_icons/ios.dart';
+import 'package:flutter_launcher_icons/main.dart';
+import 'package:flutter_launcher_icons/utils.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -126,6 +134,12 @@ class _WeatherAppState extends State<WeatherApp> {
     }
   }
 
+  final nameHolder = TextEditingController();
+
+  clearTextInput() {
+    nameHolder.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -133,7 +147,8 @@ class _WeatherAppState extends State<WeatherApp> {
       home: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('images/$weather.jpg'),
+              image: NetworkImage(
+                  'https://raw.githubusercontent.com/devSouvik/assets/main/images/$weather.jpg'),
               fit: BoxFit.cover,
               colorFilter: new ColorFilter.mode(
                   Colors.black.withOpacity(0.6), BlendMode.dstATop),
@@ -143,19 +158,35 @@ class _WeatherAppState extends State<WeatherApp> {
               ? Center(child: CircularProgressIndicator())
               : Scaffold(
                   appBar: AppBar(
-                    actions: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            _getCurrentLocation();
-                          },
-                          child: Icon(Icons.my_location_rounded, size: 36.0),
+                    title: Opacity(
+                      opacity: 0.6,
+                      child: TextField(
+                        onSubmitted: (String input) {
+                          onTextFieldSubmitted(input);
+                          clearTextInput();
+                        },
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                        decoration: InputDecoration(
+                          hintText: 'Search another location...',
+                          hintStyle:
+                              TextStyle(color: Colors.white, fontSize: 18.0),
+                          prefixIcon: Icon(Icons.search, color: Colors.white),
                         ),
-                      )
-                    ],
+                      ),
+                    ),
                     backgroundColor: Colors.transparent,
                     elevation: 0.0,
+                    actions: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(right: 15.0),
+                        child: IconButton(
+                          onPressed: () {
+                            _getCurrentLocation();
+                          },
+                          icon: Icon(Icons.location_on, size: 36.0),
+                        ),
+                      ),
+                    ],
                   ),
                   resizeToAvoidBottomInset: false,
                   backgroundColor: Colors.transparent,
@@ -204,26 +235,6 @@ class _WeatherAppState extends State<WeatherApp> {
                       ),
                       Column(
                         children: <Widget>[
-                          Container(
-                            width: 300,
-                            child: Opacity(
-                              opacity: 0.6,
-                              child: TextField(
-                                onSubmitted: (String input) {
-                                  onTextFieldSubmitted(input);
-                                },
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 25),
-                                decoration: InputDecoration(
-                                  hintText: 'Search another location...',
-                                  hintStyle: TextStyle(
-                                      color: Colors.white, fontSize: 18.0),
-                                  prefixIcon:
-                                      Icon(Icons.search, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
                           Padding(
                             padding:
                                 const EdgeInsets.only(right: 32.0, left: 32.0),
