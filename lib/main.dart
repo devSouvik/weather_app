@@ -242,10 +242,8 @@ class _WeatherAppState extends State<WeatherApp> {
                               errorMessage,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.redAccent,
-                                // fontSize:
-                                // Platform.isAndroid ? 15.0 : 20.0)),
-                              ),
+                                  color: Colors.redAccent,
+                                  fontSize: Platform.isAndroid ? 15.0 : 20.0),
                             ),
                           ),
                         ],
