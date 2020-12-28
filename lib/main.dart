@@ -134,11 +134,7 @@ class _WeatherAppState extends State<WeatherApp> {
     }
   }
 
-  final nameHolder = TextEditingController();
-
-  clearTextInput() {
-    nameHolder.clear();
-  }
+  var _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -161,9 +157,9 @@ class _WeatherAppState extends State<WeatherApp> {
                     title: Opacity(
                       opacity: 0.6,
                       child: TextField(
+                        controller: _controller,
                         onSubmitted: (String input) {
                           onTextFieldSubmitted(input);
-                          clearTextInput();
                         },
                         style: TextStyle(color: Colors.white, fontSize: 25),
                         decoration: InputDecoration(
@@ -171,6 +167,10 @@ class _WeatherAppState extends State<WeatherApp> {
                           hintStyle:
                               TextStyle(color: Colors.white, fontSize: 18.0),
                           prefixIcon: Icon(Icons.search, color: Colors.white),
+                          suffixIcon: IconButton(
+                            onPressed: () => _controller.clear(),
+                            icon: Icon(Icons.clear),
+                          ),
                         ),
                       ),
                     ),
